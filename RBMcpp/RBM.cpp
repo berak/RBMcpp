@@ -24,9 +24,7 @@ namespace artelab
 
     void RBM::init_rng_and_sampler(sample_fun_ptr sampleFun)
     {
-        struct timespec now;
-        clock_gettime(CLOCK_MONOTONIC, &now);
-        rng = cv::RNG(now.tv_nsec);
+        rng = cv::RNG(cv::getTickCount());
 
         if(sampleFun == NULL)
             _sampler = sample_neuron_activation;
@@ -354,7 +352,7 @@ namespace artelab
     {
         fs["batch"] >> this->batch_size;
         fs["cdk"] >> this->cdk;
-        fs ["iter"] >> this->iterations;
+        fs["iter"] >> this->iterations;
         fs["lr"] >> this->learning_rate;
         fs["momentum"] >> this->momentum;
         fs["wd_delta"] >> this->wd_delta;

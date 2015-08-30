@@ -142,14 +142,14 @@ namespace artelab
         cv::pow(patterns - a, 2, tmp);
         cv::reduce(tmp / 2, tmp, 1, CV_REDUCE_SUM);
 
-        float first_term = cv::mean(tmp)[0];
+        float first_term = float(cv::mean(tmp)[0]);
 
         tmp = patterns * weights.t() + cv::repeat(hid_bias.t(), patterns.rows, 1);
         cv::exp(tmp, tmp);
         cv::log(tmp + 1, tmp);
         cv::reduce(tmp, tmp, 1, CV_REDUCE_SUM);
 
-        float second_term = cv::mean(tmp)[0];
+        float second_term = float(cv::mean(tmp)[0]);
 
         return first_term - second_term;
     }

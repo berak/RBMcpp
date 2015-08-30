@@ -7,12 +7,11 @@
  * 
  */
 
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include "rbmUtils.h"
 
 namespace artelab
@@ -101,48 +100,48 @@ namespace artelab
 
     void save_histogram_image(cv::Mat hist, FileInfo file, std::string title)
     {
-        CV_Assert(hist.rows == 2);
-        using std::endl;
+        //CV_Assert(hist.rows == 2);
+        //using std::endl;
 
-        cv::Mat x = hist.row(1);
-        cv::Mat y = hist.row(0);
+        //cv::Mat x = hist.row(1);
+        //cv::Mat y = hist.row(0);
 
-        char cwd[256];
-        getcwd(cwd, sizeof(cwd));
+        //char cwd[256];
+        //getcwd(cwd, sizeof(cwd));
 
-        std::string  dir;
-        if(file.fullName() == "")
-            dir = std::string(cwd);
-        else
-            dir = file.getBaseDir();
+        //std::string  dir;
+        //if(file.fullName() == "")
+        //    dir = std::string(cwd);
+        //else
+        //    dir = file.getBaseDir();
 
-        std::ostringstream ss;
-        ss << "reset" << endl
-           << "set term png truecolor" << endl
-           << "set output \"" << file.getName() << "\"" << endl
-           << "set title \"" << title << "\"" << endl
-           << "set grid" << endl
-           << "set autoscale" << endl
-           << "set boxwidth 0.95 relative" << endl
-           << "set style fill transparent solid 0.5" << endl
-           << "plot \"-\" u 1:2 w boxes lc rgb\"red\" notitle" << endl;
+        //std::ostringstream ss;
+        //ss << "reset" << endl
+        //   << "set term png truecolor" << endl
+        //   << "set output \"" << file.getName() << "\"" << endl
+        //   << "set title \"" << title << "\"" << endl
+        //   << "set grid" << endl
+        //   << "set autoscale" << endl
+        //   << "set boxwidth 0.95 relative" << endl
+        //   << "set style fill transparent solid 0.5" << endl
+        //   << "plot \"-\" u 1:2 w boxes lc rgb\"red\" notitle" << endl;
 
-        bool directory_exists = chdir(dir.c_str()) == 0;
-        CV_Assert(directory_exists);
+        //bool directory_exists = chdir(dir.c_str()) == 0;
+        //CV_Assert(directory_exists);
 
-        FILE* p = popen("gnuplot > /dev/null 2>&1", "w");
-        fputs(ss.str().c_str(), p);
+        //FILE* p = popen("gnuplot > /dev/null 2>&1", "w");
+        //fputs(ss.str().c_str(), p);
 
-        for(int i=0; i < x.cols; i++)
-        {
-            std::ostringstream s;
-            s << x.at<float>(0, i) << " " << y.at<float>(0,i) << endl;
-            fputs(s.str().c_str(), p);
-        }
-        fputs("e", p);
-        pclose(p);
+        //for(int i=0; i < x.cols; i++)
+        //{
+        //    std::ostringstream s;
+        //    s << x.at<float>(0, i) << " " << y.at<float>(0,i) << endl;
+        //    fputs(s.str().c_str(), p);
+        //}
+        //fputs("e", p);
+        //pclose(p);
 
-        chdir(cwd);
+        //chdir(cwd);
     }
 
 
@@ -150,7 +149,7 @@ namespace artelab
     {
         artelab::save_histogram_image(hist, file, title);
         cv::Mat image = cv::imread(file.fullName(), CV_LOAD_IMAGE_COLOR);
-        remove(file.fullName().c_str());
+        //remove(file.fullName().c_str());
         return image;
     }
 
@@ -207,7 +206,7 @@ namespace artelab
     {
         cv::Mat out_image;
 
-        int num_col = images_column <= 0? int(sqrt(rbm->num_hidden())) : images_column;
+        int num_col = images_column <= 0? int(sqrt((double)rbm->num_hidden())) : images_column;
         int num_row = rbm->num_hidden() / num_col;
         num_row = num_row*num_col < rbm->num_hidden()? num_row+1 : num_row;
 

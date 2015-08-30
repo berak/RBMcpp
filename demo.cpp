@@ -70,60 +70,69 @@ void load_data(string filename, cv::Mat& patterns, cv::Mat& labels)
 
 int main(int argc, char** argv) 
 {
+    RBMglu rbm;
+
     // load data
     cv::Mat train, train_lab, val, val_lab, test, test_lab;
     load_data("traindata.mat", train, train_lab);
     load_data("validationdata.mat", val, val_lab);
     load_data("testdata.mat", test, test_lab);
-    
+       
     cout << "Data split" << endl;
     cout << "Train data: " << train.rows << "x" << train.cols << endl;
     cout << "Validation data: " << val.rows << "x" << val.cols << endl;
     cout << "Test data: " << test.rows << "x" << test.cols << endl << endl;
-    
-    // Train RBM
-    cout << "Training RBM" << endl;
-    const int num_hid = 200;
-    const int epochs = 10;
-    RBMglu::TrainParams params;
-    params.learning_rate = 0.02;
-    params.batch_size = 10;
-    params.momentum = 0.5;
-    params.iterations = train.rows / params.batch_size * epochs;
-    params.weight_decay = RBMglu::TrainParams::L2_WEIGHT_DECAY;
-    params.wd_delta = 0.0002;
-    
-    RBMglu rbm(train.cols, num_hid);
-    rbm.set_seed(345)
-       .set_datasets(train, val)
-       .set_step_type(RBM::EPOCHS)
-       .set_train_params(params);
-    
-    cout << rbm.description() << endl << endl;
-    
-    int epoch = 0;
-    print_header();
-    while(++epoch && rbm.step())
+
+    if (0)
     {
-        print_info(&rbm, epoch, train, val);
+        // Train RBM
+        cout << "Training RBM" << endl;
+        const int epochs = 10;
+        RBMglu::TrainParams params;
+        params.learning_rate = 0.02f;
+        params.batch_size = 10;
+        params.momentum = 0.5f;
+        params.iterations = train.rows / params.batch_size * epochs;
+        params.weight_decay = RBMglu::TrainParams::L2_WEIGHT_DECAY;
+        params.wd_delta = 0.0002f;
         
-        show_bases(&rbm, cv::Size(16,16));
-        show_weights_histogram(&rbm);
-        cv::waitKey(epoch==1? 10000 : 1000);
+        const int num_hid = 200;
+        rbm = RBMglu(train.cols, num_hid);
+        rbm.set_seed(345)
+           .set_datasets(train, val)
+           .set_step_type(RBM::EPOCHS)
+           .set_train_params(params);
         
-        if(epoch == 5)
+        cout << rbm.description() << endl << endl;
+        
+        int epoch = 0;
+        print_header();
+        while(++epoch && rbm.step())
         {
-            params.learning_rate = 0.001;
-            params.momentum = 0.9;
-            rbm.set_train_params(params);
+            print_info(&rbm, epoch, train, val);
+            
+            show_bases(&rbm, cv::Size(16,16));
+           // show_weights_histogram(&rbm);
+            cv::waitKey(epoch==1? 10000 : 1000);
+            
+            if(epoch == 5)
+            {
+                params.learning_rate = 0.001f;
+                params.momentum = 0.9f;
+                rbm.set_train_params(params);
+            }
         }
+        print_info(&rbm, epoch, train, val);
+        show_bases(&rbm, cv::Size(16,16));
+        rbm.save("rbm.xml");
+        cout << "RBM succesfully trained; press any key to continue... " << flush;
+        cv::waitKey();
+        cout << endl;
     }
-    print_info(&rbm, epoch, train, val);
-    show_bases(&rbm, cv::Size(16,16));
-    cout << "RBM succesfully trained; press any key to continue... " << flush;
-    cv::waitKey();
-    cout << endl;
-    
+    else // no training
+    {
+        rbm = RBMglu("rbm.xml",0);
+    }
     // Classification
     cout << "Classification using the RBM features" << endl;
     cv::Mat train_feat, test_feat;
@@ -132,8 +141,8 @@ int main(int argc, char** argv)
     feature_patterns(&rbm, train, train_feat);
     
     cv::SVMParams svm_params;
-    svm_params.kernel_type = cv::SVM::LINEAR;
-    svm_params.svm_type = cv::SVM::C_SVC;
+    svm_params.kernel_type = cv::ml::SVM::LINEAR;
+    svm_params.svm_type = cv::ml::SVM::C_SVC;
     const int kfold = 5;
     
     SVM svm(svm_params);

@@ -8,13 +8,19 @@
  */
 
 #include "RBMbb.h"
-
+#include <cmath>
 extern cv::RNG rng;
 
 typedef float (*sample_fun_ptr)(float);
 
 namespace artelab
 {
+    double log2( double n )  
+    {  
+        // log(n)/log(2) is log2.  
+        return log( n ) / log( 2.0 );  
+    }
+
 
     RBMbb::RBMbb() : RBM()
     { }

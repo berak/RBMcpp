@@ -10,7 +10,7 @@
 #ifndef CONFUSIONMATRIX_H
 #define	CONFUSIONMATRIX_H
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 
 namespace artelab
 {

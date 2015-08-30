@@ -48,7 +48,7 @@ namespace artelab
                 batch_size = 100;
                 cdk = 1;
                 weight_decay = NO_WEIGHT_DECAY;
-                wd_delta = 0.00001;
+                wd_delta = 0.00001f;
             }
 
             void save(cv::FileStorage fs);

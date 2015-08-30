@@ -18,6 +18,7 @@ namespace artelab
     {
     public:
 
+        RBMglu() {}
         RBMglu(const int nVis, const int nHid, float (*sampleFun)(float)=NULL);
         RBMglu(const std::string filepath, float (*sampleFun)(float)=NULL);
 

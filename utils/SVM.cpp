@@ -14,8 +14,8 @@ namespace artelab
 
     SVM::SVM(cv::SVMParams params)
     {
-        _params = params;
-        _model = cv::SVM();
+        _model = cv::ml::SVM::create();
+        set_params(params);
     }
 
     bool SVM::is_trained()
@@ -25,27 +25,27 @@ namespace artelab
 
     void SVM::load(std::string file)
     {
-        _model.load(file.c_str());
-        _params = _model.get_params();
+        _model = cv::Algorithm::load<cv::ml::SVM>(file.c_str());
         _trained = true;
     }
 
     void SVM::save(std::string file)
     {
-        _model.save(file.c_str());
+        _model->save(file.c_str());
     }
 
     bool SVM::train(const cv::Mat& trainingData, const cv::Mat& targets, const int kfold)
     {
         if(kfold == NO_KFOLD)
         {
-            _trained = _model.train(trainingData, targets, cv::Mat(), cv::Mat(), _params);
-            _params = _model.get_params();
+            _trained = _model->train(trainingData, cv::ml::ROW_SAMPLE, targets);
+            _params = get_params();
         }
         else if(kfold > 1)
         {
-            _trained = _model.train_auto(trainingData, targets, cv::Mat(), cv::Mat(), _params, kfold);
-            _params = _model.get_params();
+            cv::Ptr<cv::ml::TrainData> trainData = cv::ml::TrainData::create(trainingData, cv::ml::ROW_SAMPLE, targets);
+            _trained = _model->trainAuto(trainData, kfold);
+            _params = get_params();
         }
         else
         {
@@ -59,18 +59,30 @@ namespace artelab
         outPredictions.create(samples.rows, 1, CV_32FC1);
         for(unsigned int i = 0; i < samples.rows; i++)
         {
-            outPredictions.at<float>(i, 0) = _model.predict(samples.row(i));
+            outPredictions.at<float>(i, 0) = _model->predict(samples.row(i));
         }
     }
 
     cv::SVMParams SVM::get_params()
     {
+        _params.kernel_type = _model->getKernelType();
+        _params.svm_type = _model->getType();
+        _params.C = _model->getC();
+        _params.nu = _model->getNu();
+        _params.gamma = _model->getGamma();
+        _params.degree = _model->getDegree();
         return _params;
     }
 
     SVM& SVM::set_params(cv::SVMParams params)
     {
         _params = params;
+        _model->setKernel(_params.kernel_type); 
+        _model->setType(_params.svm_type); 
+        _model->setNu(_params.nu); 
+        _model->setC(_params.C); 
+        _model->setGamma(_params.gamma); 
+        _model->setDegree(_params.degree); 
         return *this;
     }
 
@@ -81,19 +93,19 @@ namespace artelab
         ss << "SVM Type: ";
         switch(_params.svm_type)
         {
-            case cv::SVM::C_SVC:
+            case cv::ml::SVM::C_SVC:
                 ss << "C_SVC\n" << "C: " << _params.C;
                 break;
-            case cv::SVM::NU_SVC:
+            case cv::ml::SVM::NU_SVC:
                 ss << "NU_SVC\n" << "Nu: " << _params.nu;
                 break;
-            case cv::SVM::ONE_CLASS:
+            case cv::ml::SVM::ONE_CLASS:
                 ss << "ONE_CLASS\n" << "Nu: " << _params.nu;
                 break;
-            case cv::SVM::EPS_SVR:
+            case cv::ml::SVM::EPS_SVR:
                 ss << "EPS_SVR\n" << "C: " << _params.C << " p: " << _params.p;
                 break;
-            case cv::SVM::NU_SVR:
+            case cv::ml::SVM::NU_SVR:
                 ss << "NU_SVR\n" << "C: " << _params.C << " Nu: " << _params.nu;
                 break;
             default:
@@ -104,18 +116,18 @@ namespace artelab
         ss << "Kernel: ";
         switch(_params.kernel_type)
         {
-            case cv::SVM::LINEAR:
+            case cv::ml::SVM::LINEAR:
                 ss << "LINEAR";
                 break;
-            case cv::SVM::POLY:
+            case cv::ml::SVM::POLY:
                 ss << "POLY degree" << _params.degree 
                    << " gamma: " << _params.gamma
                    << " coef0: " << _params.coef0;
                 break;
-            case cv::SVM::RBF:
+            case cv::ml::SVM::RBF:
                 ss << "RBF gamma: " << _params.gamma;
                 break;
-            case cv::SVM::SIGMOID:
+            case cv::ml::SVM::SIGMOID:
                 ss << "SIGMOID gamma: " << _params.gamma 
                    << " coef0: " << _params.coef0;
                 break;
@@ -127,14 +139,14 @@ namespace artelab
         ss << "TERM type: ";
         switch(_params.term_crit.type)
         {
-            case CV_TERMCRIT_ITER:
-                ss << "iter " << _params.term_crit.max_iter;
+            case cv::TermCriteria::MAX_ITER:
+                ss << "iter " << _params.term_crit.maxCount;
                 break;
-            case CV_TERMCRIT_EPS:
+            case cv::TermCriteria::EPS:
                 ss << "epsilon " << _params.term_crit.epsilon;
                 break;
-            case CV_TERMCRIT_EPS | CV_TERMCRIT_ITER:
-                ss << "iter&epsilon iter: " << _params.term_crit.max_iter
+            case cv::TermCriteria::EPS | cv::TermCriteria::MAX_ITER:
+                ss << "iter&epsilon iter: " << _params.term_crit.maxCount
                    << " epsilon: " << _params.term_crit.epsilon;
                 break;
             default:
