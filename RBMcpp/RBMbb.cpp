@@ -15,11 +15,13 @@ typedef float (*sample_fun_ptr)(float);
 
 namespace artelab
 {
+#ifndef log2    // not available on win
     double log2( double n )  
     {  
         // log(n)/log(2) is log2.  
         return log( n ) / log( 2.0 );  
     }
+#endif
 
 
     RBMbb::RBMbb() : RBM()

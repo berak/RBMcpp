@@ -9,7 +9,7 @@
 
 #include <fstream>
 #include <iomanip>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui.hpp>
 
 #include "utils/ConfusionMatrix.h"
 #include "utils/SVM.h"
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
     cout << "Validation data: " << val.rows << "x" << val.cols << endl;
     cout << "Test data: " << test.rows << "x" << test.cols << endl << endl;
 
-    if (0)
+    if (1)
     {
         // Train RBM
         cout << "Training RBM" << endl;
